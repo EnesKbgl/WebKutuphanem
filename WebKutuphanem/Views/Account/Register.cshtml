@@ -1,0 +1,263 @@
+﻿@model WebKutuphanem.ViewModels.RegisterViewModel
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kayıt Ol - Web Kütüphanem</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            /* Masaüstü Gradient (Yeşil tonları) */
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 50%, #81c784 100%);
+        }
+
+        /* --- VİDEO AYARLARI (Mobil İçin) --- */
+        #bg-video {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            z-index: -1;
+            object-fit: cover;
+            display: none;
+        }
+
+        /* DÜZELTME: Razor hatasını önlemek için @@media kullanıldı */
+        @@media (max-width: 768px) {
+            #bg-video {
+                display: block;
+            }
+
+            body {
+                background: transparent;
+            }
+        }
+
+        .register-container {
+            width: 100%;
+            max-width: 480px; /* Register biraz daha geniş */
+        }
+
+        .register-card {
+            border-radius: 20px;
+            padding: 40px 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            /* --- GLASSMORPHISM --- */
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        /* Razor hatasını önlemek için @@keyframes kullanıldı */
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .register-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+            .register-header h1 {
+                color: #2e7d32;
+                font-size: 28px;
+                font-weight: 700;
+                margin-bottom: 5px;
+            }
+
+            .register-header p {
+                color: #555;
+                font-size: 14px;
+            }
+
+        .input-group-custom {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+            .input-group-custom .icon {
+                position: absolute;
+                left: 15px;
+                top: 43px;
+                color: #2e7d32;
+                font-size: 18px;
+                z-index: 10;
+            }
+
+            .input-group-custom input {
+                width: 100%;
+                padding: 12px 15px 12px 45px;
+                border: 2px solid rgba(0,0,0,0.1);
+                border-radius: 12px;
+                font-size: 15px;
+                transition: all 0.3s ease;
+                background: rgba(255, 255, 255, 0.9);
+            }
+
+                .input-group-custom input:focus {
+                    outline: none;
+                    border-color: #2e7d32;
+                    background: #ffffff;
+                    box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.1);
+                }
+
+            .input-group-custom label {
+                display: block;
+                margin-bottom: 6px;
+                color: #333;
+                font-weight: 600;
+                font-size: 13px;
+            }
+
+        .btn-register {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(46, 125, 50, 0.3);
+        }
+
+            .btn-register:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(46, 125, 50, 0.4);
+            }
+
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #444;
+            font-size: 14px;
+        }
+
+            .login-link a {
+                color: #2e7d32;
+                text-decoration: none;
+                font-weight: 700;
+            }
+
+                .login-link a:hover {
+                    text-decoration: underline;
+                }
+
+        .text-danger {
+            color: #d32f2f;
+            font-size: 13px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(255, 235, 238, 0.9);
+            border-radius: 8px;
+            border-left: 4px solid #d32f2f;
+            display: none;
+        }
+
+            .text-danger:not(:empty) {
+                display: block;
+            }
+
+        .validation-error {
+            color: #d32f2f;
+            font-size: 12px;
+            margin-top: 4px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <video autoplay muted loop playsinline id="bg-video">
+        <source src="~/videos/mobile-bg.mp4" type="video/mp4">
+    </video>
+
+    <div class="register-container">
+        <div class="register-card">
+            <div class="register-header">
+                <h1><i class="fas fa-user-plus"></i> Kayıt Ol</h1>
+                <p>Aramıza katılın</p>
+            </div>
+
+            <form asp-action="Register" asp-controller="Account" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="input-group-custom">
+                    <label asp-for="UserName">Kullanıcı Adı</label>
+                    <input asp-for="UserName" type="text" placeholder="Kullanıcı adınızı belirleyin" autocomplete="username" />
+                    <i class="fas fa-user icon"></i>
+                    <span asp-validation-for="UserName" class="validation-error"></span>
+                </div>
+
+                <div class="input-group-custom">
+                    <label asp-for="Email">E-posta</label>
+                    <input asp-for="Email" type="email" placeholder="ornek@email.com" autocomplete="email" />
+                    <i class="fas fa-envelope icon"></i>
+                    <span asp-validation-for="Email" class="validation-error"></span>
+                </div>
+
+                <div class="input-group-custom">
+                    <label asp-for="Password">Şifre</label>
+                    <input asp-for="Password" type="password" placeholder="Güçlü bir şifre belirleyin" autocomplete="new-password" />
+                    <i class="fas fa-lock icon"></i>
+                    <span asp-validation-for="Password" class="validation-error"></span>
+                </div>
+
+                <div class="input-group-custom">
+                    <label asp-for="ConfirmPassword">Şifre Tekrar</label>
+                    <input asp-for="ConfirmPassword" type="password" placeholder="Şifrenizi tekrar girin" autocomplete="new-password" />
+                    <i class="fas fa-lock icon"></i>
+                    <span asp-validation-for="ConfirmPassword" class="validation-error"></span>
+                </div>
+
+                <button type="submit" class="btn-register">
+                    <i class="fas fa-user-check"></i> Kayıt Ol
+                </button>
+            </form>
+
+            <div class="login-link">
+                Zaten hesabınız var mı? <a asp-action="Login" asp-controller="Account">Giriş Yap</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@3.2.12/dist/jquery.validate.unobtrusive.min.js"></script>
+</body>
+</html>

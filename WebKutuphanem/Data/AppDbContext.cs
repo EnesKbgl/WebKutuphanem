@@ -1,10 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using WebKutuphanem.Models;
 
-namespace WebKutuphanem.Data
+namespace WebKutuphanem.Data  
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext : IdentityDbContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
@@ -12,4 +12,4 @@ namespace WebKutuphanem.Data
 
         public DbSet<Book> Books { get; set; }
     }
-}
+} 

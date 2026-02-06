@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization; // <-- BU KÜTÜPHANE EKLENDİ (GÜVENLİK İÇİN)
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebKutuphanem.Data;
 using WebKutuphanem.Models;
@@ -15,47 +16,47 @@ namespace WebKutuphanem.Controllers
             _context = context;
         }
 
+        // ============================================================
+        // LİSTELEME (HERKESE AÇIK)
+        // ============================================================
+
         // GET: /Books/Index
-        // Kitapları veritabanından çeker ve sayfaya gönderir
-        // GET: /Books/Index
-        // Arama (searchString), Filtreleme (statusFilter) ve Sıralama (sortOrder) parametrelerini alır
+        // Buraya [Authorize] KOYMADIK. Çünkü vitrini herkes görsün istiyoruz.
         public async Task<IActionResult> Index(string searchString, string statusFilter, string sortOrder)
         {
-            // 1. Önce tüm kitapları sorgu olarak hazırla (Henüz veritabanına gitmedi)
-            var books = from b in _context.Books
-                        select b;
+            // 1. Önce tüm kitapları sorgu olarak hazırla
+            var books = from b in _context.Books select b;
 
-            // 2. Arama Kelimesi varsa filtrele (Başlık veya Yazarda ara)
+            // 2. Arama Kelimesi varsa filtrele
             if (!string.IsNullOrEmpty(searchString))
             {
                 books = books.Where(s => s.Title.Contains(searchString) || s.Author.Contains(searchString));
             }
 
-            // 3. Durum Filtresi varsa (Okunacak, Okuyor vb.) uygula
+            // 3. Durum Filtresi varsa uygula
             if (!string.IsNullOrEmpty(statusFilter) && statusFilter != "all")
             {
                 books = books.Where(x => x.Status == statusFilter);
             }
 
-            // 4. Sıralama (Switch-Case ile karar ver)
+            // 4. Sıralama
             switch (sortOrder)
             {
                 case "title_asc":
-                    books = books.OrderBy(b => b.Title); // A-Z
+                    books = books.OrderBy(b => b.Title);
                     break;
                 case "author_asc":
-                    books = books.OrderBy(b => b.Author); // Yazar A-Z
+                    books = books.OrderBy(b => b.Author);
                     break;
                 case "progress_desc":
-                    // İlerlemeye göre (Yüzde hesaplayıp sıralar)
                     books = books.OrderByDescending(b => (double)b.CurrentPage / b.TotalPages);
                     break;
                 default:
-                    books = books.OrderByDescending(b => b.CreatedAt); // Varsayılan: En Yeni
+                    books = books.OrderByDescending(b => b.CreatedAt);
                     break;
             }
 
-            // 5. Seçilen filtreleri sayfada tekrar göstermek için geri gönder (ViewData)
+            // 5. Filtreleri hatırlamak için ViewData'ya at
             ViewData["CurrentFilter"] = searchString;
             ViewData["CurrentStatus"] = statusFilter;
             ViewData["CurrentSort"] = sortOrder;
@@ -64,36 +65,35 @@ namespace WebKutuphanem.Controllers
             return View(await books.ToListAsync());
         }
 
-        // GET: /Books/Create
-        // Boş form sayfasını açar
+        // ============================================================
+        // EKLEME İŞLEMLERİ (SADECE ÜYELER)
+        // ============================================================
+
+        [Authorize] // <-- YASAK GELDİ: Sadece giriş yapanlar görebilir
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: /Books/Create
-        // Formdan gelen verileri (book) alır ve veritabanına kaydeder
+        [Authorize] // <-- YASAK GELDİ
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Book book)
         {
             if (ModelState.IsValid)
             {
-                // 1. Kitabı veritabanı sırasına ekle
                 _context.Add(book);
-                // 2. "Kaydet" butonuna bas (SQL'e yaz)
                 await _context.SaveChangesAsync();
-                // 3. İş bitince listeye geri dön
                 return RedirectToAction(nameof(Index));
             }
-            // Hata varsa formu tekrar göster (Hata mesajlarıyla birlikte)
             return View(book);
-
         }
-        // --- DÜZENLEME (EDIT) KISMI ---
 
-        // GET: /Books/Edit/5
-        // Düzenleme sayfasını, o kitabın mevcut bilgileriyle açar
+        // ============================================================
+        // DÜZENLEME İŞLEMLERİ (SADECE ÜYELER)
+        // ============================================================
+
+        [Authorize] // <-- YASAK GELDİ
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -104,8 +104,7 @@ namespace WebKutuphanem.Controllers
             return View(book);
         }
 
-        // POST: /Books/Edit/5
-        // Değişiklikleri kaydeder
+        [Authorize] // <-- YASAK GELDİ
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Book book)
@@ -114,17 +113,18 @@ namespace WebKutuphanem.Controllers
 
             if (ModelState.IsValid)
             {
-                _context.Update(book); // Güncelle
-                await _context.SaveChangesAsync(); // Kaydet
+                _context.Update(book);
+                await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(book);
         }
 
-        // --- SİLME (DELETE) KISMI ---
+        // ============================================================
+        // SİLME İŞLEMLERİ (SADECE ÜYELER)
+        // ============================================================
 
-        // POST: /Books/Delete/5
-        // Uyarı vermeden direkt siler (JavaScript ile onay alacağız)
+        [Authorize] // <-- YASAK GELDİ
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
@@ -132,8 +132,8 @@ namespace WebKutuphanem.Controllers
             var book = await _context.Books.FindAsync(id);
             if (book != null)
             {
-                _context.Books.Remove(book); // Sil
-                await _context.SaveChangesAsync(); // Kaydet
+                _context.Books.Remove(book);
+                await _context.SaveChangesAsync();
             }
             return RedirectToAction(nameof(Index));
         }
