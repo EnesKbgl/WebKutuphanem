@@ -7,6 +7,8 @@ namespace WebKutuphanem.Models
         [Key]
         public int Id { get; set; }
 
+        public string? UserId { get; set; }
+
         [Required(ErrorMessage = "Kitap adı zorunludur.")]
         public string Title { get; set; } // Kitap Başlığı
 

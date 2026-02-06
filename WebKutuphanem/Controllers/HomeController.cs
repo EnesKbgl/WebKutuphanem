@@ -1,34 +1,36 @@
-using Microsoft.AspNetCore.Authorization; // <-- KİLİT İÇİN GEREKLİ KÜTÜPHANE
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity; // Eklendi
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics; // <-- Hata sayfası için gerekli
+using System.Diagnostics;
 using WebKutuphanem.Data;
 using WebKutuphanem.Models;
 
 namespace WebKutuphanem.Controllers
 {
-    // SINIFIN TEPESİNE BUNU EKLEDİK:
-    // Artık giriş yapmayan hiç kimse bu sayfadaki (Index, Statistics vb.) verilere erişemez.
     [Authorize]
     public class HomeController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly UserManager<IdentityUser> _userManager; // Eklendi
 
-        public HomeController(AppDbContext context)
+        // Constructor'a UserManager eklendi
+        public HomeController(AppDbContext context, UserManager<IdentityUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
-        // Ana Sayfa (Dashboard)
-        // [Authorize] sınıfın tepesinde olduğu için burası artık korumalıdır.
         public IActionResult Index()
         {
-            // Kartlardaki Sayılar
-            ViewBag.TotalBooks = _context.Books.Count();
-            ViewBag.ReadingCount = _context.Books.Count(b => b.Status == "reading");
-            ViewBag.FinishedCount = _context.Books.Count(b => b.Status == "finished");
+            var userId = _userManager.GetUserId(User); // Giriş yapan kişi
 
-            // Son Eklenen 5 Kitap
+            // Tüm sorgulara .Where(b => b.UserId == userId) eklendi
+            ViewBag.TotalBooks = _context.Books.Count(b => b.UserId == userId);
+            ViewBag.ReadingCount = _context.Books.Count(b => b.Status == "reading" && b.UserId == userId);
+            ViewBag.FinishedCount = _context.Books.Count(b => b.Status == "finished" && b.UserId == userId);
+
             var recentBooks = _context.Books
+                .Where(b => b.UserId == userId) // Sadece benim kitaplarım
                 .OrderByDescending(b => b.CreatedAt)
                 .Take(5)
                 .ToList();
@@ -36,52 +38,51 @@ namespace WebKutuphanem.Controllers
             return View(recentBooks);
         }
 
-        // İstatistikler Sayfası
         public IActionResult Statistics()
         {
-            // Kart 1: Bu Ay Eklenen Kitap Sayısı
+            var userId = _userManager.GetUserId(User);
+
+            // Sorgular filtrelendi
             ViewBag.BooksThisMonth = _context.Books
-                .Count(b => b.CreatedAt.Month == DateTime.Now.Month && b.CreatedAt.Year == DateTime.Now.Year);
+                .Count(b => b.UserId == userId && b.CreatedAt.Month == DateTime.Now.Month && b.CreatedAt.Year == DateTime.Now.Year);
 
-            // Kart 2: Toplam Okunan Sayfa
-            ViewBag.TotalReadPages = _context.Books.Sum(b => (int?)b.CurrentPage) ?? 0;
+            ViewBag.TotalReadPages = _context.Books
+                .Where(b => b.UserId == userId)
+                .Sum(b => (int?)b.CurrentPage) ?? 0;
 
-            // Kart 3: Ortalama Kitap Kalınlığı
-            var totalBooks = _context.Books.Count();
+            var userBooks = _context.Books.Where(b => b.UserId == userId);
+            var totalBooks = userBooks.Count();
+
             ViewBag.AvgPageCount = totalBooks > 0
-                ? (int)_context.Books.Average(b => b.TotalPages)
+                ? (int)userBooks.Average(b => b.TotalPages)
                 : 0;
 
-            // Kart 4: Toplam Kitap (Basitlik için)
             ViewBag.TotalBooks = totalBooks;
 
             return View();
         }
 
-        // --- GRAFİK VERİLERİNİ HAZIRLAYAN METOT ---
-        // Bu metot da [Authorize] sayesinde korunur.
-        // Giriş yapmayan biri dışarıdan veri çekemez.
         [HttpGet]
         public IActionResult GetChartData()
         {
-            // 1. Pasta Grafik: Kitap Durumları
+            var userId = _userManager.GetUserId(User);
+            var myBooks = _context.Books.Where(b => b.UserId == userId); // Filtre
+
             var statusCounts = new
             {
-                Reading = _context.Books.Count(b => b.Status == "reading"),
-                Finished = _context.Books.Count(b => b.Status == "finished"),
-                ToRead = _context.Books.Count(b => b.Status == "to-read")
+                Reading = myBooks.Count(b => b.Status == "reading"),
+                Finished = myBooks.Count(b => b.Status == "finished"),
+                ToRead = myBooks.Count(b => b.Status == "to-read")
             };
 
-            // 2. Bar Grafik: En Çok Okunan Yazarlar (İlk 5)
-            var topAuthors = _context.Books
+            var topAuthors = myBooks
                 .GroupBy(b => b.Author)
                 .Select(g => new { Author = g.Key, Count = g.Count() })
                 .OrderByDescending(x => x.Count)
                 .Take(5)
                 .ToList();
 
-            // 3. Çizgi Grafik: Aylık Veriler
-            var monthlyData = _context.Books
+            var monthlyData = myBooks
                 .AsEnumerable()
                 .GroupBy(b => b.CreatedAt.ToString("MMM"))
                 .Select(g => new { Month = g.Key, Count = g.Count() })
@@ -90,14 +91,8 @@ namespace WebKutuphanem.Controllers
             return Json(new { statusCounts, topAuthors, monthlyData });
         }
 
-        public IActionResult Privacy()
-        {
-            return View();
-        }
+        public IActionResult Privacy() { return View(); }
 
-        // --- HATA SAYFASI (ÖNEMLİ) ---
-        // Eğer giriş yapmamış biri hata alırsa sonsuz döngüye girmesin diye
-        // burayı [AllowAnonymous] ile herkese açıyoruz.
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         [AllowAnonymous]
         public IActionResult Error()
