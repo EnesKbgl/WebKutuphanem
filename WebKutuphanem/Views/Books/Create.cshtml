@@ -1,0 +1,154 @@
+﻿@{
+    ViewData["Title"] = "Yeni Kitap Ekle";
+}
+
+<link rel="stylesheet" href="~/css/add-book.css">
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="page-title" data-testid="add-book-title">Yeni Kitap Ekle</h1>
+        <p class="text-muted">Kütüphanenize yeni bir kitap ekleyin</p>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8 col-xl-7">
+        <div class="content-card">
+            <form method="post" data-testid="add-book-form">
+
+                <div class="form-section mb-4">
+                    <h5 class="form-section-title">
+                        <i class="bi bi-info-circle text-primary me-2"></i>
+                        Temel Bilgiler
+                    </h5>
+
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label for="bookTitle" class="form-label">Kitap Başlığı <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="bookTitle" name="Title" placeholder="Örn: Suç ve Ceza" required data-testid="book-title-input">
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label for="bookAuthor" class="form-label">Yazar <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="bookAuthor" name="Author" placeholder="Örn: Fyodor Dostoyevski" required data-testid="book-author-input">
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label for="bookISBN" class="form-label">ISBN</label>
+                            <input type="text" class="form-control" id="bookISBN" name="ISBN" placeholder="Örn: 9789750738265" data-testid="book-isbn-input">
+                        </div>
+
+                        <div class="col-12">
+                            <label for="bookCover" class="form-label">Kapak Görseli URL'si</label>
+                            <input type="url" class="form-control" id="bookCover" name="CoverImage" placeholder="https://example.com/book-cover.jpg" data-testid="book-cover-input">
+                            <div class="form-text">
+                                <i class="bi bi-info-circle me-1"></i> Kitabın kapak görselinin internet adresini girin
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section mb-4">
+                    <h5 class="form-section-title">
+                        <i class="bi bi-bar-chart text-primary me-2"></i>
+                        Okuma İlerlemesi
+                    </h5>
+
+                    <div class="row g-3">
+                        <div class="col-12 col-md-4">
+                            <label for="bookStatus" class="form-label">Durum <span class="text-danger">*</span></label>
+                            <select class="form-select" id="bookStatus" name="Status" required data-testid="book-status-select">
+                                <option value="">Durum seçin</option>
+                                <option value="to-read">Okunacak</option>
+                                <option value="reading">Okuyor</option>
+                                <option value="finished">Tamamlandı</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <label for="totalPages" class="form-label">Toplam Sayfa <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="totalPages" name="TotalPages" placeholder="Örn: 671" min="1" required data-testid="total-pages-input">
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <label for="currentPage" class="form-label">Mevcut Sayfa</label>
+                            <input type="number" class="form-control" id="currentPage" name="CurrentPage" placeholder="Örn: 145" min="0" value="0" data-testid="current-page-input">
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">Okuma İlerlemeniz</label>
+                            <div class="progress-preview">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="text-muted small" data-testid="progress-preview-text">Sayfa 0 / 0</span>
+                                    <span class="fw-bold" data-testid="progress-preview-percent">0%</span>
+                                </div>
+                                <div class="progress" style="height: 10px;">
+                                    <div class="progress-bar bg-primary" role="progressbar" style="width: 0%" id="progressBarPreview" data-testid="progress-bar-preview"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <a asp-controller="Books" asp-action="Index" class="btn btn-outline-secondary" data-testid="cancel-btn">
+                        <i class="bi bi-x-circle me-2"></i> İptal
+                    </a>
+                    <button type="submit" class="btn btn-primary" data-testid="save-book-btn">
+                        <i class="bi bi-check-circle me-2"></i> Kitabı Kaydet
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Update progress preview when user changes values
+        const totalPagesInput = document.getElementById('totalPages');
+        const currentPageInput = document.getElementById('currentPage');
+        const progressBarPreview = document.getElementById('progressBarPreview');
+        const progressPreviewText = document.querySelector('[data-testid="progress-preview-text"]');
+        const progressPreviewPercent = document.querySelector('[data-testid="progress-preview-percent"]');
+
+        function updateProgressPreview() {
+            const totalPages = parseInt(totalPagesInput.value) || 0;
+            const currentPage = parseInt(currentPageInput.value) || 0;
+
+            if (totalPages > 0) {
+                const percentage = Math.min(Math.round((currentPage / totalPages) * 100), 100);
+                progressBarPreview.style.width = percentage + '%';
+                progressPreviewText.textContent = `Sayfa ${currentPage} / ${totalPages}`;
+                progressPreviewPercent.textContent = percentage + '%';
+
+                // Update progress bar color based on percentage
+                progressBarPreview.className = 'progress-bar';
+                if (percentage === 100) {
+                    progressBarPreview.classList.add('bg-success');
+                } else if (percentage > 0) {
+                    progressBarPreview.classList.add('bg-warning');
+                } else {
+                    progressBarPreview.classList.add('bg-secondary');
+                }
+            } else {
+                progressBarPreview.style.width = '0%';
+                progressPreviewText.textContent = 'Sayfa 0 / 0';
+                progressPreviewPercent.textContent = '0%';
+            }
+
+            // Ensure current page doesn't exceed total pages
+            if (currentPage > totalPages) {
+                currentPageInput.value = totalPages;
+            }
+        }
+
+        totalPagesInput.addEventListener('input', updateProgressPreview);
+        currentPageInput.addEventListener('input', updateProgressPreview);
+
+        // Set max attribute on current page when total pages changes
+        totalPagesInput.addEventListener('input', function() {
+            currentPageInput.max = this.value;
+        });
+    </script>
+}   

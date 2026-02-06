@@ -1,0 +1,81 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - WebKütüphanem</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand d-flex align-items-center" href="/Home/Index">
+                <i class="bi bi-book-half text-primary me-2 fs-4"></i>
+                <span class="fw-bold text-dark">WebKütüphanem</span>
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Home/Index">
+                            <i class="bi bi-house-door me-1"></i> Ana Sayfa
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Books/Index">
+                            <i class="bi bi-journal-bookmark me-1"></i> Kitaplarım
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Books/Create">
+                            <i class="bi bi-plus-circle me-1"></i> Kitap Ekle
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Home/Statistics">
+                            <i class="bi bi-graph-up me-1"></i> İstatistikler
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container-fluid px-4 py-4">
+            @RenderBody()
+        </div>
+    </main>
+
+    <footer class="footer mt-auto py-4 bg-light border-top">
+        <div class="container-fluid px-4">
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="text-muted mb-0 small">
+                        <i class="bi bi-book-half text-primary me-1"></i>
+                        &copy; 2026 WebKütüphanem
+                    </p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <p class="text-muted mb-0 small">
+                        ASP.NET Core MVC <i>Enes Kaboğlu</i> | Tüm Hakları Saklıdır.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

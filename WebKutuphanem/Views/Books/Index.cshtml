@@ -1,0 +1,129 @@
+﻿@model IEnumerable<WebKutuphanem.Models.Book>
+
+@{
+    ViewData["Title"] = "Kitaplarım";
+}
+
+<link rel="stylesheet" href="~/css/my-books.css">
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h1 class="page-title">Kitaplarım</h1>
+                <p class="text-muted">Tüm kitaplarınızı burada görebilirsiniz</p>
+            </div>
+            <a asp-controller="Books" asp-action="Create" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-2"></i> Yeni Kitap Ekle
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="content-card bg-white p-3 rounded shadow-sm">
+            <form asp-action="Index" method="get">
+                <div class="row g-3">
+
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0">
+                                <i class="bi bi-search text-muted"></i>
+                            </span>
+                            <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" class="form-control border-start-0" placeholder="Kitap veya yazar ara...">
+                        </div>
+                    </div>
+
+                    <div class="col-6 col-md-3 col-lg-2">
+                        <select name="statusFilter" class="form-select" onchange="this.form.submit()">
+                            <option value="all">Tüm Durumlar</option>
+                            <option value="reading" selected="@(ViewData["CurrentStatus"]?.ToString() == "reading" ? "selected" : null)">Okuyor</option>
+                            <option value="finished" selected="@(ViewData["CurrentStatus"]?.ToString() == "finished" ? "selected" : null)">Tamamlandı</option>
+                            <option value="to-read" selected="@(ViewData["CurrentStatus"]?.ToString() == "to-read" ? "selected" : null)">Okunacak</option>
+                        </select>
+                    </div>
+
+                    <div class="col-6 col-md-3 col-lg-2">
+                        <select name="sortOrder" class="form-select" onchange="this.form.submit()">
+                            <option value="recent" selected="@(ViewData["CurrentSort"]?.ToString() == "recent" ? "selected" : null)">En Yeni</option>
+                            <option value="title_asc" selected="@(ViewData["CurrentSort"]?.ToString() == "title_asc" ? "selected" : null)">Başlık (A-Z)</option>
+                            <option value="author_asc" selected="@(ViewData["CurrentSort"]?.ToString() == "author_asc" ? "selected" : null)">Yazar (A-Z)</option>
+                            <option value="progress_desc" selected="@(ViewData["CurrentSort"]?.ToString() == "progress_desc" ? "selected" : null)">İlerleme</option>
+                        </select>
+                    </div>
+
+                    <div class="col-6 col-md-3 col-lg-2">
+                        <a asp-action="Index" class="btn btn-outline-secondary w-100">
+                            <i class="bi bi-x-lg"></i> Temizle
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    @if (!Model.Any())
+    {
+        <div class="col-12">
+            <div class="empty-state text-center py-5">
+                <i class="bi bi-book fs-1 text-muted mb-3"></i>
+                <h5 class="text-muted">Aradığınız kriterlere uygun kitap bulunamadı.</h5>
+                <a asp-action="Index" class="btn btn-outline-primary mt-3">Listeyi Sıfırla</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        @foreach (var item in Model)
+        {
+            <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+                <div class="book-card h-100 bg-white rounded shadow-sm overflow-hidden">
+                    <div class="book-cover position-relative" style="height: 250px;">
+                        <img src="@(string.IsNullOrEmpty(item.CoverImage) ? "https://via.placeholder.com/300x450?text=Kapak+Yok" : item.CoverImage)"
+                             alt="@item.Title" style="width: 100%; height: 100%; object-fit: cover;">
+
+                        @{
+                            var statusClass = item.Status == "finished" ? "bg-success" : (item.Status == "reading" ? "bg-warning text-dark" : "bg-secondary");
+                            var statusText = item.Status == "finished" ? "Tamamlandı" : (item.Status == "reading" ? "Okuyor" : "Okunacak");
+                        }
+                        <span class="position-absolute top-0 end-0 m-2 badge @statusClass">
+                            @statusText
+                        </span>
+                    </div>
+
+                    <div class="book-info p-3">
+                        <h5 class="fw-bold text-truncate" title="@item.Title">@item.Title</h5>
+                        <p class="text-muted small"><i class="bi bi-person"></i> @item.Author</p>
+
+                        <div class="book-progress mb-3">
+                            @{
+                                var percent = item.TotalPages > 0 ? (int)((double)item.CurrentPage / item.TotalPages * 100) : 0;
+                            }
+                            <div class="d-flex justify-content-between align-items-center mb-1 small">
+                                <span class="text-muted">Sayfa @item.CurrentPage / @item.TotalPages</span>
+                                <span class="fw-bold">@percent%</span>
+                            </div>
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar bg-primary" role="progressbar" style="width: @percent%"></div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary flex-grow-1">
+                                <i class="bi bi-pencil"></i> Düzenle
+                            </a>
+                            <form asp-action="Delete" asp-route-id="@item.Id" method="post" onsubmit="return confirm('Silmek istediğinize emin misiniz?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>

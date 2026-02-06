@@ -1,0 +1,87 @@
+﻿/* ===================================
+   Add Book Page - Additional Styles
+   =================================== */
+
+/* ============ Form Sections ============ */
+.form-section {
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+    .form-section:last-of-type {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+.form-section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+}
+
+/* ============ Form Controls ============ */
+.form-label {
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.form-control, .form-select {
+    border-color: var(--border-color);
+    padding: 0.675rem 0.875rem;
+    font-size: 0.95rem;
+    border-radius: var(--border-radius-sm);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 0.2rem rgba(79, 70, 229, 0.15);
+    }
+
+    .form-control::placeholder {
+        color: var(--text-muted);
+    }
+
+.form-text {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-top: 0.375rem;
+}
+
+/* ============ Progress Preview ============ */
+.progress-preview {
+    background-color: var(--bg-light);
+    padding: 1rem;
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--border-color);
+}
+
+/* ============ Form Actions ============ */
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    padding-top: 1.5rem;
+    margin-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+    .form-actions .btn {
+        min-width: 140px;
+    }
+
+/* ============ Responsive Adjustments ============ */
+@media (max-width: 576px) {
+    .form-actions {
+        flex-direction: column-reverse;
+    }
+
+        .form-actions .btn {
+            width: 100%;
+        }
+}

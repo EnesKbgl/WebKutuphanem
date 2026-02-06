@@ -1,0 +1,190 @@
+﻿@{
+    ViewData["Title"] = "İstatistikler";
+}
+
+<link rel="stylesheet" href="~/css/statistics.css">
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="page-title" data-testid="statistics-title">Okuma İstatistikleri</h1>
+        <p class="text-muted">Okuma alışkanlıklarınızı takip edin</p>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="stat-card" data-testid="books-this-month-card">
+            <div class="stat-icon bg-primary-soft">
+                <i class="bi bi-calendar-check text-primary"></i>
+            </div>
+            <div class="stat-content">
+                <h4 class="stat-number" data-testid="books-this-month">@ViewBag.BooksThisMonth</h4>
+                <p class="stat-label">Bu Ay Eklenen</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="stat-card" data-testid="pages-this-week-card">
+            <div class="stat-icon bg-warning-soft">
+                <i class="bi bi-file-text text-warning"></i>
+            </div>
+            <div class="stat-content">
+                <h4 class="stat-number" data-testid="pages-this-week">@ViewBag.TotalReadPages</h4>
+                <p class="stat-label">Toplam Okunan Sayfa</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="stat-card" data-testid="avg-pages-card">
+            <div class="stat-icon bg-success-soft">
+                <i class="bi bi-graph-up-arrow text-success"></i>
+            </div>
+            <div class="stat-content">
+                <h4 class="stat-number" data-testid="avg-pages">@ViewBag.AvgPageCount</h4>
+                <p class="stat-label">Ortalama Sayfa Sayısı</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="stat-card" data-testid="reading-streak-card">
+            <div class="stat-icon bg-danger-soft">
+                <i class="bi bi-book text-danger"></i>
+            </div>
+            <div class="stat-content">
+                <h4 class="stat-number" data-testid="reading-streak">@ViewBag.TotalBooks</h4>
+                <p class="stat-label">Toplam Kitap</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-12 col-lg-8">
+        <div class="content-card chart-card">
+            <div class="chart-header">
+                <h5 class="chart-title" data-testid="monthly-progress-title">
+                    <i class="bi bi-bar-chart text-primary me-2"></i>
+                    Aylık Okuma İlerlemesi
+                </h5>
+                <select class="form-select form-select-sm chart-filter" data-testid="year-filter">
+                    <option value="2024">2026</option>
+                    <option value="2023">2025</option>
+                </select>
+            </div>
+            <div class="chart-container">
+                <canvas id="monthlyProgressChart" data-testid="monthly-progress-chart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-lg-4">
+        <div class="content-card chart-card">
+            <div class="chart-header">
+                <h5 class="chart-title" data-testid="status-distribution-title">
+                    <i class="bi bi-pie-chart text-primary me-2"></i>
+                    Kitap Durumları
+                </h5>
+            </div>
+            <div class="chart-container">
+                <canvas id="statusDistributionChart" data-testid="status-distribution-chart"></canvas>
+            </div>
+            <div class="chart-legend text-center mt-3">
+                <small class="text-muted">Grafik verileri canlıdır.</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-12 col-lg-6">
+        <div class="content-card chart-card">
+            <div class="chart-header">
+                <h5 class="chart-title" data-testid="daily-activity-title">
+                    <i class="bi bi-activity text-primary me-2"></i>
+                    Günlük Okuma Aktivitesi
+                </h5>
+            </div>
+            <div class="chart-container">
+                <canvas id="dailyActivityChart" data-testid="daily-activity-chart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-lg-6">
+        <div class="content-card chart-card">
+            <div class="chart-header">
+                <h5 class="chart-title" data-testid="top-authors-title">
+                    <i class="bi bi-star text-primary me-2"></i>
+                    En Çok Okunan Yazarlar
+                </h5>
+            </div>
+            <div class="chart-container">
+                <canvas id="topAuthorsChart" data-testid="top-authors-chart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="content-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="chart-title mb-0" data-testid="reading-goals-title">
+                    <i class="bi bi-trophy text-primary me-2"></i>
+                    Yıllık Okuma Hedeflerim
+                </h5>
+                <button class="btn btn-sm btn-outline-primary" data-testid="edit-goals-btn">
+                    <i class="bi bi-pencil"></i> Hedefleri Düzenle
+                </button>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-12 col-md-6">
+                    <div class="goal-card" data-testid="book-count-goal">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="goal-title">Kitap Sayısı Hedefi</h6>
+                            <span class="goal-progress-text">@ViewBag.TotalBooks / 50</span>
+                        </div>
+                        <div class="progress mb-2" style="height: 12px;">
+                            @{
+                                int bookGoal = 50;
+                                int currentBooks = ViewBag.TotalBooks != null ? (int)ViewBag.TotalBooks : 0;
+                                int percent = (currentBooks * 100) / bookGoal;
+                            }
+                            <div class="progress-bar bg-primary" role="progressbar" style="width: @percent%" data-testid="book-count-progress"></div>
+                        </div>
+                        <p class="text-muted small mb-0">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Yıl sonuna kadar @(bookGoal - currentBooks) kitap daha okumanız gerekiyor
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <div class="goal-card" data-testid="pages-count-goal">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="goal-title">Sayfa Sayısı Hedefi</h6>
+                            <span class="goal-progress-text">@ViewBag.TotalReadPages / 15,000</span>
+                        </div>
+                        <div class="progress mb-2" style="height: 12px;">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: 10%" data-testid="pages-count-progress"></div>
+                        </div>
+                        <p class="text-muted small mb-0">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Okumaya devam!
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <script src="~/js/statistics-charts.js" asp-append-version="true"></script>
+}

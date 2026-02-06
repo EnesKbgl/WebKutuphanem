@@ -1,0 +1,97 @@
+﻿@model IEnumerable<WebKutuphanem.Models.Book>
+
+@{
+    ViewData["Title"] = "Kontrol Paneli";
+}
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="page-title">Kontrol Paneli</h1>
+        <p class="text-muted">Kütüphanenize genel bakış</p>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="summary-card">
+            <div class="card-icon bg-primary-soft">
+                <i class="bi bi-book text-primary"></i>
+            </div>
+            <div class="card-content">
+                <h3 class="card-number">@ViewBag.TotalBooks</h3>
+                <p class="card-label">Toplam Kitap</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="summary-card">
+            <div class="card-icon bg-warning-soft">
+                <i class="bi bi-bookmark-heart text-warning"></i>
+            </div>
+            <div class="card-content">
+                <h3 class="card-number">@ViewBag.ReadingCount</h3>
+                <p class="card-label">Şu Anda Okuyor</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="summary-card">
+            <div class="card-icon bg-success-soft">
+                <i class="bi bi-check-circle text-success"></i>
+            </div>
+            <div class="card-content">
+                <h3 class="card-number">@ViewBag.FinishedCount</h3>
+                <p class="card-label">Tamamlanan</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="content-card">
+            <div class="card-header-custom d-flex justify-content-between align-items-center mb-4">
+                <h2 class="section-title mb-0">
+                    <i class="bi bi-clock-history text-primary me-2"></i>
+                    Son Eklenen Kitaplar
+                </h2>
+                <a href="/Books/Index" class="btn btn-sm btn-outline-primary">
+                    Tümünü Gör <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+
+            <div class="activity-timeline">
+                @if (!Model.Any())
+                {
+                    <div class="empty-state text-center py-4">
+                        <p class="text-muted">Henüz aktivite yok.</p>
+                        <a href="/Books/Create" class="btn btn-primary btn-sm">Kitap Ekle</a>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var book in Model)
+                    {
+                        <div class="activity-item">
+                            <div class="activity-icon @(book.Status == "finished" ? "bg-success-soft" : "bg-primary-soft")">
+                                <i class="bi @(book.Status == "finished" ? "bi-check-lg text-success" : "bi-plus-lg text-primary")"></i>
+                            </div>
+                            <div class="activity-content">
+                                <h6 class="activity-title">
+                                    <strong>"@book.Title"</strong> kütüphaneye eklendi
+                                </h6>
+                                <p class="activity-meta text-muted">
+                                    <i class="bi bi-person me-1"></i> @book.Author
+                                    <span class="mx-2">•</span>
+                                    <i class="bi bi-calendar3 me-1"></i> @book.CreatedAt.ToString("dd MMM yyyy")
+                                </p>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>
