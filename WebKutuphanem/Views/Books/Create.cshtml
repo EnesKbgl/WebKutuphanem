@@ -14,6 +14,22 @@
 <div class="row justify-content-center">
     <div class="col-12 col-lg-8 col-xl-7">
         <div class="content-card">
+
+            <div class="google-search-box">
+                <div class="google-search-title">
+                    <i class="bi bi-google me-2"></i> Sihirli Arama Motoru
+                </div>
+                <div class="input-group mb-2">
+                    <input type="text" id="googleSearchInput" class="form-control" placeholder="Kitap Adı, Yazar veya Barkod (ISBN) girin..." autocomplete="off">
+                    <button class="btn btn-primary" type="button" id="googleSearchBtn">
+                        <i class="bi bi-search me-1"></i> Otomatik Doldur
+                    </button>
+                </div>
+                <div id="searchStatus" class="form-text mt-2">
+                    <i class="bi bi-info-circle me-1"></i> Aramak istediğiniz kitabı yazın, tüm bilgileri sizin için bulalım.
+                </div>
+            </div>
+
             <form method="post" data-testid="add-book-form">
 
                 <div class="form-section mb-4">
@@ -25,25 +41,32 @@
                     <div class="row g-3">
                         <div class="col-12">
                             <label for="bookTitle" class="form-label">Kitap Başlığı <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="bookTitle" name="Title" placeholder="Örn: Suç ve Ceza" required data-testid="book-title-input">
+                            <input type="text" class="form-control auto-fill-target" id="bookTitle" name="Title" placeholder="Örn: Suç ve Ceza" required data-testid="book-title-input">
                         </div>
 
                         <div class="col-12 col-md-6">
                             <label for="bookAuthor" class="form-label">Yazar <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="bookAuthor" name="Author" placeholder="Örn: Fyodor Dostoyevski" required data-testid="book-author-input">
+                            <input type="text" class="form-control auto-fill-target" id="bookAuthor" name="Author" placeholder="Örn: Fyodor Dostoyevski" required data-testid="book-author-input">
                         </div>
 
                         <div class="col-12 col-md-6">
-                            <label for="bookISBN" class="form-label">ISBN</label>
-                            <input type="text" class="form-control" id="bookISBN" name="ISBN" placeholder="Örn: 9789750738265" data-testid="book-isbn-input">
+                            <label for="bookISBN" class="form-label">ISBN (Barkod)</label>
+                            <input type="text" class="form-control auto-fill-target" id="bookISBN" name="ISBN" placeholder="Örn: 9789750738265" data-testid="book-isbn-input">
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label for="bookPublisher" class="form-label">Yayınevi</label>
+                            <input type="text" class="form-control auto-fill-target" id="bookPublisher" name="Publisher" placeholder="Örn: Can Yayınları">
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label for="bookCover" class="form-label">Kapak Görseli URL'si</label>
+                            <input type="url" class="form-control auto-fill-target" id="bookCover" name="CoverImage" placeholder="https://example.com/cover.jpg" data-testid="book-cover-input">
                         </div>
 
                         <div class="col-12">
-                            <label for="bookCover" class="form-label">Kapak Görseli URL'si</label>
-                            <input type="url" class="form-control" id="bookCover" name="CoverImage" placeholder="https://example.com/book-cover.jpg" data-testid="book-cover-input">
-                            <div class="form-text">
-                                <i class="bi bi-info-circle me-1"></i> Kitabın kapak görselinin internet adresini girin
-                            </div>
+                            <label for="bookDescription" class="form-label">Kitap Özeti</label>
+                            <textarea class="form-control auto-fill-target" id="bookDescription" name="Description" rows="3" placeholder="Kitabın arka kapak yazısı veya kısa özeti..."></textarea>
                         </div>
                     </div>
                 </div>
@@ -67,7 +90,7 @@
 
                         <div class="col-12 col-md-4">
                             <label for="totalPages" class="form-label">Toplam Sayfa <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="totalPages" name="TotalPages" placeholder="Örn: 671" min="1" required data-testid="total-pages-input">
+                            <input type="number" class="form-control auto-fill-target" id="totalPages" name="TotalPages" placeholder="Örn: 671" min="1" required data-testid="total-pages-input">
                         </div>
 
                         <div class="col-12 col-md-4">
@@ -105,7 +128,9 @@
 
 @section Scripts {
     <script>
-        // Update progress preview when user changes values
+        // ==========================================
+        // 1. MEVCUT KODLAR: Progress Bar İlerlemesi
+        // ==========================================
         const totalPagesInput = document.getElementById('totalPages');
         const currentPageInput = document.getElementById('currentPage');
         const progressBarPreview = document.getElementById('progressBarPreview');
@@ -122,22 +147,16 @@
                 progressPreviewText.textContent = `Sayfa ${currentPage} / ${totalPages}`;
                 progressPreviewPercent.textContent = percentage + '%';
 
-                // Update progress bar color based on percentage
                 progressBarPreview.className = 'progress-bar';
-                if (percentage === 100) {
-                    progressBarPreview.classList.add('bg-success');
-                } else if (percentage > 0) {
-                    progressBarPreview.classList.add('bg-warning');
-                } else {
-                    progressBarPreview.classList.add('bg-secondary');
-                }
+                if (percentage === 100) progressBarPreview.classList.add('bg-success');
+                else if (percentage > 0) progressBarPreview.classList.add('bg-warning');
+                else progressBarPreview.classList.add('bg-secondary');
             } else {
                 progressBarPreview.style.width = '0%';
                 progressPreviewText.textContent = 'Sayfa 0 / 0';
                 progressPreviewPercent.textContent = '0%';
             }
 
-            // Ensure current page doesn't exceed total pages
             if (currentPage > totalPages) {
                 currentPageInput.value = totalPages;
             }
@@ -146,9 +165,77 @@
         totalPagesInput.addEventListener('input', updateProgressPreview);
         currentPageInput.addEventListener('input', updateProgressPreview);
 
-        // Set max attribute on current page when total pages changes
         totalPagesInput.addEventListener('input', function() {
             currentPageInput.max = this.value;
         });
+
+        // ==========================================
+        // 2. YENİ KODLAR: Google Books API (Sihirli Arama)
+        // ==========================================
+        document.getElementById('googleSearchBtn').addEventListener('click', async function() {
+            const query = document.getElementById('googleSearchInput').value.trim();
+            const statusEl = document.getElementById('searchStatus');
+            const btn = this;
+
+            if (!query) {
+                statusEl.innerHTML = '<span class="text-danger"><i class="bi bi-exclamation-circle me-1"></i> Lütfen aramak için bir kelime veya ISBN girin.</span>';
+                return;
+            }
+
+            // Arama yapılırken buton ve mesaj durumu
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Aranıyor...';
+            statusEl.innerHTML = '<span class="text-primary"><span class="spinner-grow spinner-grow-sm me-1"></span> Google devasa kütüphanesinde aranıyor...</span>';
+
+            try {
+                // Backend'deki yeni yazdığımız metoda istek atıyoruz
+                const response = await fetch(`/Books/SearchFromGoogle?query=${encodeURIComponent(query)}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    // Form elemanlarını doldur
+                    document.getElementById('bookTitle').value = data.title || '';
+                    document.getElementById('bookAuthor').value = data.author || '';
+                    document.getElementById('bookISBN').value = data.isbn || '';
+                    document.getElementById('bookCover').value = data.coverImage || '';
+                    document.getElementById('totalPages').value = data.pageCount || '';
+                    document.getElementById('bookPublisher').value = data.publisher || '';
+                    document.getElementById('bookDescription').value = data.description || '';
+
+                    // Sayfa sayısı değiştiği için ilerleme çubuğunu tetikle
+                    updateProgressPreview();
+
+                    // Başarı mesajı
+                    statusEl.innerHTML = '<span class="text-success fw-bold"><i class="bi bi-check-circle-fill me-1"></i> Kitap bulundu ve bilgiler başarıyla dolduruldu!</span>';
+
+                    // Dolu olan inputlara yeşil parlama animasyonu (Görsel şölen)
+                    document.querySelectorAll('.auto-fill-target').forEach(input => {
+                        if (input.value !== '') {
+                            input.classList.remove('autofill-highlight');
+                            void input.offsetWidth; // Animasyonu sıfırlamak için küçük bir trick
+                            input.classList.add('autofill-highlight');
+                        }
+                    });
+
+                } else {
+                    // Kitap bulunamadıysa
+                    statusEl.innerHTML = `<span class="text-danger"><i class="bi bi-x-circle me-1"></i> ${data.message} Kendiniz doldurabilirsiniz.</span>`;
+                }
+            } catch (error) {
+                statusEl.innerHTML = '<span class="text-danger"><i class="bi bi-wifi-off me-1"></i> Bağlantı hatası oluştu.</span>';
+            } finally {
+                // Butonu eski haline getir
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-search me-1"></i> Otomatik Doldur';
+            }
+        });
+
+        // Arama kutusunda "Enter" tuşuna basıldığında formu göndermek yerine aramayı tetikle
+        document.getElementById('googleSearchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault(); // Formun submit olmasını engelle
+                document.getElementById('googleSearchBtn').click(); // Arama butonuna tıkla
+            }
+        });
     </script>
-}   
+}

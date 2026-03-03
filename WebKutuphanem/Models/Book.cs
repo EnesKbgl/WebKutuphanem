@@ -29,5 +29,11 @@ namespace WebKutuphanem.Models
 
         // Kayıt Tarihi (Otomatik atansın diye)
         public DateTime CreatedAt { get; set; } = DateTime.Now;
+
+        // --- GOOGLE BOOKS API İÇİN YENİ EKLENENLER ---
+
+        public string? Description { get; set; } // Kitabın Özeti / Arka Kapak Yazısı
+
+        public string? Publisher { get; set; } // Yayınevi
     }
 }

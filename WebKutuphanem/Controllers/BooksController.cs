@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity; // UserManager için gerekli
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json; // Google Books API'den gelen veriyi okumak için eklendi
 using WebKutuphanem.Data;
 using WebKutuphanem.Models;
 
@@ -133,6 +134,97 @@ namespace WebKutuphanem.Controllers
                 await _context.SaveChangesAsync();
             }
             return RedirectToAction(nameof(Index));
+        }
+
+        // ============================================================
+        // GOOGLE BOOKS API İLE KİTAP ARAMA (SİHİRLİ MOTOR)
+        // ============================================================
+        [HttpGet]
+        public async Task<IActionResult> SearchFromGoogle(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return Json(new { success = false, message = "Arama kelimesi boş olamaz." });
+
+            // BURAYA KENDİ KOPYALADIĞIN API ANAHTARINI YAPIŞTIR (Tırnaklar kalsın)
+            string apiKey = "AIzaSyC3-Cd-cygT9qtxF4oPF5HaC0wPTZbVTfM";
+
+            // Linkin sonuna &key={apiKey} ekledik!
+            string url = $"https://www.googleapis.com/books/v1/volumes?q={Uri.EscapeDataString(query)}&maxResults=1&key={apiKey}";
+
+            using (var client = new HttpClient())
+            {
+                // ÇÖZÜM BURADA: Google bizi zararlı bir bot sanmasın diye sahte bir tarayıcı kimliği (User-Agent) ekliyoruz.
+                client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");
+
+                try
+                {
+                    var response = await client.GetAsync(url);
+
+                    // Eğer Google isteği yinede reddederse, TAM hata kodunu (örn: 403, 429) ekrana yazdırıyoruz ki anlayalım.
+                    if (!response.IsSuccessStatusCode)
+                        return Json(new { success = false, message = $"API Bağlantı Hatası: {(int)response.StatusCode} - {response.ReasonPhrase}" });
+
+                    var jsonString = await response.Content.ReadAsStringAsync();
+
+                    using (var document = JsonDocument.Parse(jsonString))
+                    {
+                        var root = document.RootElement;
+
+                        if (!root.TryGetProperty("items", out var items) || items.GetArrayLength() == 0)
+                            return Json(new { success = false, message = "Kitap bulunamadı." });
+
+                        var volumeInfo = items[0].GetProperty("volumeInfo");
+
+                        string title = volumeInfo.TryGetProperty("title", out var t) ? t.GetString() : "";
+
+                        string author = "";
+                        if (volumeInfo.TryGetProperty("authors", out var authors) && authors.GetArrayLength() > 0)
+                        {
+                            author = authors[0].GetString();
+                        }
+
+                        int pageCount = volumeInfo.TryGetProperty("pageCount", out var pc) ? pc.GetInt32() : 0;
+                        string description = volumeInfo.TryGetProperty("description", out var desc) ? desc.GetString() : "";
+                        string publisher = volumeInfo.TryGetProperty("publisher", out var pub) ? pub.GetString() : "";
+
+                        string coverImage = "";
+                        if (volumeInfo.TryGetProperty("imageLinks", out var imageLinks))
+                        {
+                            coverImage = imageLinks.TryGetProperty("thumbnail", out var thumb) ? thumb.GetString() : "";
+                            if (coverImage.StartsWith("http:")) coverImage = coverImage.Replace("http:", "https:");
+                        }
+
+                        string isbn = "";
+                        if (volumeInfo.TryGetProperty("industryIdentifiers", out var identifiers))
+                        {
+                            foreach (var id in identifiers.EnumerateArray())
+                            {
+                                if (id.GetProperty("type").GetString() == "ISBN_13" || id.GetProperty("type").GetString() == "ISBN_10")
+                                {
+                                    isbn = id.GetProperty("identifier").GetString();
+                                    break;
+                                }
+                            }
+                        }
+
+                        return Json(new
+                        {
+                            success = true,
+                            title = title,
+                            author = author,
+                            pageCount = pageCount,
+                            description = description,
+                            publisher = publisher,
+                            coverImage = coverImage,
+                            isbn = isbn
+                        });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return Json(new { success = false, message = "Sistemsel Hata: " + ex.Message });
+                }
+            }
         }
     }
 }

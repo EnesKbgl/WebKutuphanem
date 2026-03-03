@@ -85,3 +85,42 @@
             width: 100%;
         }
 }
+/* ============ Google Search Box (Yeni Eklendi) ============ */
+.google-search-box {
+    background: linear-gradient(145deg, rgba(79, 70, 229, 0.03) 0%, rgba(79, 70, 229, 0.08) 100%);
+    border: 2px dashed rgba(79, 70, 229, 0.4);
+    border-radius: var(--border-radius-md, 10px);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    transition: all 0.3s ease;
+}
+
+    .google-search-box:hover {
+        border-color: rgba(79, 70, 229, 0.8);
+        box-shadow: 0 4px 15px rgba(79, 70, 229, 0.1);
+    }
+
+.google-search-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: rgba(79, 70, 229, 1); /* Primary Color */
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+/* Otomatik doldurma efekti (Veri gelince kutular yanıp söner) */
+.autofill-highlight {
+    animation: highlightField 1.5s ease;
+}
+
+@keyframes highlightField {
+    0% {
+        background-color: rgba(40, 167, 69, 0.2);
+        border-color: #28a745;
+    }
+
+    100% {
+        background-color: transparent;
+    }
+}
